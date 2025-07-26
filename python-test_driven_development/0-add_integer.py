@@ -6,6 +6,7 @@ Provides a single function add_integer(a, b=98) that
 adds two integers (floats are cast to ints).
 """
 
+
 def add_integer(a, b=98):
     """
     Add two integers a and b.
