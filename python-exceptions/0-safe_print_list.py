@@ -1,11 +1,7 @@
 #!/usr/bin/python3
-def safe_print_list(my_list=[], x=0):
-    count = 0
-    try:
-        for i in range(x):
-            print(my_list[i], end="")
-            count += 1
-    except IndexError:
-        pass
-    print()
-    return coun
+raise_exception_msg = __import__('6-raise_exception_msg').raise_exception_msg
+
+try:
+    raise_exception_msg("C is fun")
+except NameError as ne:
+    print(ne)
