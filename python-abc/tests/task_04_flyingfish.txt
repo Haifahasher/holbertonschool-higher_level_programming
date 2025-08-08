@@ -1,0 +1,32 @@
+"""
+Test cases for the FlyingFish class demonstrating multiple inheritance.
+
+>>> from task_04_flyingfish import Fish, Bird, FlyingFish
+
+>>> # Test Fish class
+>>> fish = Fish()
+>>> fish.swim()
+The fish is swimming
+>>> fish.habitat()
+The fish lives in water
+
+>>> # Test Bird class
+>>> bird = Bird()
+>>> bird.fly()
+The bird is flying
+>>> bird.habitat()
+The bird lives in the sky
+
+>>> # Test FlyingFish class
+>>> flying_fish = FlyingFish()
+>>> flying_fish.swim()
+The flying fish is swimming!
+>>> flying_fish.fly()
+The flying fish is soaring!
+>>> flying_fish.habitat()
+The flying fish lives both in water and the sky!
+
+>>> # Test Method Resolution Order (MRO)
+>>> FlyingFish.mro()
+[<class 'task_04_flyingfish.FlyingFish'>, <class 'task_04_flyingfish.Fish'>, <class 'task_04_flyingfish.Bird'>, <class 'object'>]
+""" 

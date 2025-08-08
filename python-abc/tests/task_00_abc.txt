@@ -1,0 +1,22 @@
+"""
+Test cases for the Animal abstract class and its subclasses.
+
+>>> from task_00_abc import Animal, Dog, Cat
+
+>>> # Test Dog class
+>>> dog = Dog()
+>>> dog.sound()
+'Bark'
+
+>>> # Test Cat class
+>>> cat = Cat()
+>>> cat.sound()
+'Meow'
+
+>>> # Test that Animal cannot be instantiated
+>>> try:
+...     animal = Animal()
+... except TypeError as e:
+...     print("TypeError: Can't instantiate abstract class Animal with abstract method sound")
+TypeError: Can't instantiate abstract class Animal with abstract method sound
+""" 

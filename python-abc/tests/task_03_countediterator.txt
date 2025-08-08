@@ -1,0 +1,51 @@
+"""
+Test cases for the CountedIterator class.
+
+>>> from task_03_countediterator import CountedIterator
+
+>>> # Test CountedIterator with a list
+>>> data = [1, 2, 3, 4]
+>>> counted_iter = CountedIterator(data)
+
+>>> # Test initial count
+>>> counted_iter.get_count()
+0
+
+>>> # Test iteration and counting
+>>> next(counted_iter)
+1
+>>> counted_iter.get_count()
+1
+
+>>> next(counted_iter)
+2
+>>> counted_iter.get_count()
+2
+
+>>> next(counted_iter)
+3
+>>> counted_iter.get_count()
+3
+
+>>> next(counted_iter)
+4
+>>> counted_iter.get_count()
+4
+
+>>> # Test StopIteration
+>>> try:
+...     next(counted_iter)
+... except StopIteration:
+...     print("No more items.")
+No more items.
+
+>>> # Test with empty list
+>>> empty_iter = CountedIterator([])
+>>> empty_iter.get_count()
+0
+>>> try:
+...     next(empty_iter)
+... except StopIteration:
+...     print("Empty iterator.")
+Empty iterator.
+""" 

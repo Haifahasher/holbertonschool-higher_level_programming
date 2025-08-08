@@ -1,0 +1,34 @@
+"""
+Test cases for the Dragon class using SwimMixin and FlyMixin.
+
+>>> from task_05_dragon import SwimMixin, FlyMixin, Dragon
+
+>>> # Test SwimMixin
+>>> swimmer = SwimMixin()
+>>> swimmer.swim()
+The creature swims!
+
+>>> # Test FlyMixin
+>>> flyer = FlyMixin()
+>>> flyer.fly()
+The creature flies!
+
+>>> # Test Dragon class
+>>> dragon = Dragon()
+>>> dragon.swim()
+The creature swims!
+>>> dragon.fly()
+The creature flies!
+>>> dragon.roar()
+The dragon roars!
+
+>>> # Test that Dragon inherits from both mixins
+>>> isinstance(dragon, SwimMixin)
+True
+>>> isinstance(dragon, FlyMixin)
+True
+
+>>> # Test Method Resolution Order (MRO)
+>>> Dragon.mro()
+[<class 'task_05_dragon.Dragon'>, <class 'task_05_dragon.SwimMixin'>, <class 'task_05_dragon.FlyMixin'>, <class 'object'>]
+""" 
