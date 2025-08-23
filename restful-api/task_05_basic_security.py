@@ -83,7 +83,7 @@ def basic_protected():
     """
     Basic authentication protected route
     """
-    return "Basic Auth: Access Granted"
+    return jsonify({"message": "Basic Auth: Access Granted"})
 
 
 @app.route('/login', methods=['POST'])
@@ -118,7 +118,7 @@ def jwt_protected():
     """
     JWT protected route
     """
-    return "JWT Auth: Access Granted"
+    return jsonify({"message": "JWT Auth: Access Granted"})
 
 
 @app.route('/admin-only', methods=['GET'])
@@ -131,10 +131,10 @@ def admin_only():
     claims = get_jwt()
     
     if claims.get('role') == 'admin':
-        return "Admin Access: Granted"
+        return jsonify({"message": "Admin Access: Granted"})
     else:
         return jsonify({"error": "Admin access required"}), 403
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5002)
+    app.run(debug=True, host='0.0.0.0', port=5003)
