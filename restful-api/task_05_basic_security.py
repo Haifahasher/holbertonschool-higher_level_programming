@@ -1,140 +1,106 @@
 #!/usr/bin/env python3
 """
-Task 5: API Security and Authentication Techniques
+Task 5: Flask API with SQLAlchemy (persistent storage)
 """
+
 from flask import Flask, jsonify, request
-from flask_httpauth import HTTPBasicAuth
-from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token,
-    get_jwt_identity, get_jwt
-)
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'your-secret-key-change-in-production'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # No expiration for simplicity
 
-# Initialize extensions
-auth = HTTPBasicAuth()
-jwt = JWTManager(app)
-
-# User storage with hashed passwords and roles
-users = {
-    "user1": {
-        "username": "user1", 
-        "password": generate_password_hash("password"), 
-        "role": "user"
-    },
-    "admin1": {
-        "username": "admin1", 
-        "password": generate_password_hash("password"), 
-        "role": "admin"
-    }
-}
+# Configure SQLite database
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
 
 
-@auth.verify_password
-def verify_password(username, password):
+# -------------------------
+# Database Model
+# -------------------------
+class User(db.Model):
     """
-    Verify basic authentication credentials
+    User model for storing user data
     """
-    if username in users and check_password_hash(users[username]['password'], password):
-        return username
-    return None
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    age = db.Column(db.Integer, nullable=True)
+    city = db.Column(db.String(120), nullable=True)
+
+    def to_dict(self):
+        """
+        Convert model to dictionary
+        """
+        return {
+            "id": self.id,
+            "username": self.username,
+            "age": self.age,
+            "city": self.city
+        }
 
 
-@auth.error_handler
-def auth_error():
+# -------------------------
+# Routes
+# -------------------------
+@app.route("/")
+def home():
+    return "Welcome to the Flask API with SQLAlchemy!"
+
+
+@app.route("/data")
+def data():
     """
-    Handle basic authentication errors
+    Return list of all usernames
     """
-    return jsonify({"error": "Authentication required"}), 401
+    users = User.query.all()
+    return jsonify([user.username for user in users])
 
 
-# JWT error handlers
-@jwt.unauthorized_loader
-def handle_unauthorized_error(err):
-    return jsonify({"error": "Missing or invalid token"}), 401
-
-
-@jwt.invalid_token_loader
-def handle_invalid_token_error(err):
-    return jsonify({"error": "Invalid token"}), 401
-
-
-@jwt.expired_token_loader
-def handle_expired_token_error(err):
-    return jsonify({"error": "Token has expired"}), 401
-
-
-@jwt.revoked_token_loader
-def handle_revoked_token_error(err):
-    return jsonify({"error": "Token has been revoked"}), 401
-
-
-@jwt.needs_fresh_token_loader
-def handle_needs_fresh_token_error(err):
-    return jsonify({"error": "Fresh token required"}), 401
-
-
-@app.route('/basic-protected', methods=['GET'])
-@auth.login_required
-def basic_protected():
+@app.route("/status")
+def status():
     """
-    Basic authentication protected route
+    Health check
     """
-    return jsonify({"message": "Basic Auth: Access Granted"})
+    return "OK"
 
 
-@app.route('/login', methods=['POST'])
-def login():
+@app.route("/users/<username>")
+def get_user(username):
     """
-    JWT login endpoint
+    Get user details by username
     """
-    if not request.is_json:
-        return jsonify({"error": "Content-Type must be application/json"}), 400
-    
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify(user.to_dict())
+
+
+@app.route("/add_user", methods=["POST"])
+def add_user():
+    """
+    Add a new user
+    """
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    
-    if not username or not password:
-        return jsonify({"error": "Username and password required"}), 400
-    
-    if username in users and check_password_hash(users[username]['password'], password):
-        # Create access token with user info
-        access_token = create_access_token(
-            identity=username,
-            additional_claims={"role": users[username]['role']}
-        )
-        return jsonify({"access_token": access_token}), 200
-    else:
-        return jsonify({"error": "Invalid credentials"}), 401
+
+    if not data or "username" not in data:
+        return jsonify({"error": "Username is required"}), 400
+
+    if User.query.filter_by(username=data["username"]).first():
+        return jsonify({"error": "Username already exists"}), 400
+
+    user = User(username=data["username"], age=data.get("age"), city=data.get("city"))
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({"message": "User added", "user": user.to_dict()}), 201
 
 
-@app.route('/jwt-protected', methods=['GET'])
-@jwt_required()
-def jwt_protected():
-    """
-    JWT protected route
-    """
-    return jsonify({"message": "JWT Auth: Access Granted"})
-
-
-@app.route('/admin-only', methods=['GET'])
-@jwt_required()
-def admin_only():
-    """
-    Admin-only route with role-based access control
-    """
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    
-    if claims.get('role') == 'admin':
-        return jsonify({"message": "Admin Access: Granted"})
-    else:
-        return jsonify({"error": "Admin access required"}), 403
-
-
+# -------------------------
+# Run App
+# -------------------------
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5003)
+    # Create database tables
+    with app.app_context():
+        db.create_all()
+
+    app.run(debug=True)
+
